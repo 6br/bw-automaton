@@ -5,12 +5,13 @@
 #include <queue>
 #include <unordered_map>
 #include <list>
+#include <algorithm>
 using namespace std;
-typedef unsigned long long int uuli;
+typedef unsigned long long int ulli;
 #define debug(x) cout<<#x<<": "<<x<<endl
 #define DEBUG(x) cout<<#x<<": "<<x<<endl;
 
-///*
+/*
 template <class T>
 struct Node {
     T value;
@@ -22,7 +23,7 @@ struct Node {
         
         this->children = children;
     }
-};//*/
+};*/
 
 char base2int(char base){
   char base2int;
@@ -82,42 +83,31 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
     char base = base2int(alignment[i]);
     if(base != 0){
     unsigned long long int next = (i << 3) + (int)base;
-    //cout << (int)base << " " <<next << endl;
     auto got = edges.find(prev);
       if(got == edges.end() ) {
-        //cout << prev << endl;
         std::unordered_map<unsigned long long int, int> internal_edge;
         edges.insert(make_pair(prev, internal_edge));
         got = edges.find(prev);
       }
     auto got2 = got->second.find(next);
-    //if 行き先のedgeがあるか? {
       if(got2 == got->second.end() ){
         got->second.insert(make_pair(next, 1));
       }else{
         got2->second++;
       }
     prev = next;
-    //cout << base2int(alignment[i]) << i << endl;
    }
   }
-  /*for(auto i = edges.begin(); i != edges.end(); ++i){
-    cout << i->first << endl;
-  }
-  cout << endl;*/
   return edges;
 }
 
 std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> prefix_sorted_automaton(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
-  //std::priority_queue<int> queue;
-  //Node<int> node(0);
-  std::vector<int> isa(15);
+  std::vector<int> isa;
   std::vector<int> sa_builder(100);
   std::list<int> sa;
   std::vector<int> radix(5, 0);
   std::vector<int> radix_pointer(5, 0);
-  std::vector<std::pair<unsigned long long int, unsigned long long int>> nodes(100); //開始ノードとその次のノードと終端のノードのPair
-  std::vector<std::pair<ulli, ulli, ulli>> nodes_tuple(100);
+  std::vector<std::tuple<ulli, ulli, ulli>> nodes_tuple(100);
 
   // Initialize
   for(auto i = edges.begin(); i != edges.end(); ++i){
@@ -134,17 +124,16 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
   for(auto i = edges.begin(); i != edges.end(); ++i, ++j){
     int value = i->first & 7;
     //count value
-    nodes[j] = make_pair(i->first,i->first);
-    nodes_tuple[j] = make_tuple(i->first, 0, i->first)
-    isa[j] = radix[value];
+    nodes_tuple[j] = make_tuple(i->first, 0, i->first);
+    isa.push_back(radix[value]);
     sa_builder[--radix_pointer[value]] = j;
   }
-  for(j=0;j<edges.size();j++){
+  for(j = 0; j < edges.size(); j++){
     sa.push_back(sa_builder[j]);
   }
-  j=0;
+  j = 0;
   for(auto itr=sa.begin();j<edges.size();j++,++itr){
-    cerr << j << "\t" << *itr << "\t" << (nodes[*itr].first & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
+    cerr << j << "\t" << *itr << "\t" << (get<0>(nodes_tuple[*itr]) & 7) << "\t" << isa[*itr] << "\t" << isa[j] << endl;
   }
   int node_size = edges.size();
   bool end = false;
@@ -153,65 +142,61 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
     j = 1;
 		for(auto itr = ++sa.begin(); itr != sa.end(); ++itr,j++){
         cout << j << " " << isa[*itr] << sa.size() <<endl;
-        //if((nodes[*(itr--)].second & 7) == (nodes[*(itr++)].second & 7) || (j != sa.size()-1 && ((nodes[*(++itr)].second & 7) == (nodes[*(--itr)].second & 7)) )){
         if(j != 1 && isa[*itr--] == isa[*itr++] || (j < isa.size()-1 && (isa[*++itr] == isa[*--itr]))){
         cout << j << " " << isa[*itr] << sa.size() <<endl;
         end = false;
-        //nodeの延長
-        auto succeeder = edges[nodes[*itr].second];//.second;
+        //Extend nodes.
+        auto succeeder = edges[get<2>(nodes_tuple[*itr])];
         int it = 0;
         for(auto s = succeeder.begin(); s != succeeder.end(); ++s, ++it){
             cerr << j<<" "<<it<<" " << s->first << endl;
           if (it == 0){
-            nodes[*itr].second = s->first; 
+            get<2>(nodes_tuple[*itr]) = s->first; 
           }else{
-            //nodes[sa[j]].
             std::unordered_map<unsigned long long int, int> internal_edge;
-            auto it = edges[nodes[*itr].first].begin();//.begin();
-            //if(it++==edges[nodes[*itr].first].end()){--it;}
-
+            auto it = edges[get<0>(nodes_tuple[*itr])].begin();
             cout << it->first << it->second << endl;
-            internal_edge.insert(make_pair(it->first, it->second));
-            int i;
-            for(i=1; i<10; i++){
-              cout << "aa"<< (i << 10) + nodes[*itr].first  << endl;
-              if(edges.find((i << 10)+nodes[*itr].first) == edges.end())break;
+            auto from = get<1>(nodes_tuple[*itr]);
+            if(from == 0){
+              internal_edge.insert(make_pair(s->first, s->second));
+              from = s->first;
+            }else{
+              internal_edge.insert(make_pair(get<1>(nodes_tuple[*itr]), s->second));
             }
-            edges.insert(make_pair((i<<10) + nodes[*itr].first, internal_edge));
+            int i;
+            for(i = 1; i < 10; i++){
+              cout << "aa" << (i << 10) + get<0>(nodes_tuple[*itr])  << endl;
+              if(edges.find((i << 10)+get<0>(nodes_tuple[*itr])) == edges.end())break;
+            }
+            edges.insert(make_pair((i << 10) + get<0>(nodes_tuple[*itr]), internal_edge));
             
-            nodes[node_size] = make_pair(nodes[*itr].first, s->first);
+            nodes_tuple[node_size] = make_tuple(get<0>(nodes_tuple[*itr]), from, s->first);
             isa[node_size] = isa[*itr];
             itr = sa.insert(itr, node_size);
-            node_size++;itr++;
-            
+            node_size++; itr++;
           }
         }
       }
-    }/*
-    for(j=0;j<node_size;j++){
-      cerr << j << "\t" << sa[j] << "\t" << (nodes[sa[j]].second & 7) << "\t"<<isa[sa[j]] << "\t" << isa[j] << endl;
-    }*/
+    }
     if(end == false){
-      j=1;
+      j = 1;
       for(auto itr = ++sa.begin();itr!=sa.end();j++,++itr){
-        cerr << j << "\t" << *itr << "\t" << (nodes[*itr].second & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
+        cerr << j << "\t" << *itr << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
       }
       j = 1;
       auto prev_isa = isa[*sa.begin()];
       std::multimap<int, int> bucket; //O(log n)になってしまうので、基数ソートしたいが連結リスト表現だとが大きいか。
-      for(auto itr = ++sa.begin();itr!=sa.end();j++,++itr){
+      for(auto itr = ++sa.begin(); itr!=sa.end(); j++, ++itr){
         cout << isa[*itr] << prev_isa << endl;
         if((isa[*itr]) == prev_isa){
-           bucket.insert(make_pair(nodes[*itr].second & 7, *itr)); 
+           bucket.insert(make_pair(get<2>(nodes_tuple[*itr]) & 7, *itr)); 
         }else{ 
-          //stackをどこかで処理
           if(bucket.size()>1){
             std::pair<int,int> prev_first = make_pair(0,0);
             j--;
 				    for(auto bkt = bucket.rbegin(); bkt != bucket.rend(); bkt++,j--){
-              cout << bkt->first <<" "<< bkt->second << " " << j << " " << isa[*(itr)] <<endl;
-              auto j2 = (bkt->first != prev_first.first) ? j: prev_first.second;//{isa[*--itr] = j;}else{auto stab = isa[*itr]; isa[*--itr] = stab;} //要検討
-              //auto j2 = (bkt->first != isa[*(itr)]) ? j: isa[*itr];//{isa[*--itr] = j;}else{auto stab = isa[*itr]; isa[*--itr] = stab;} //要検討
+              cerr << bkt->first <<" "<< bkt->second << " " << j << " " << isa[*(itr)] << endl;
+              auto j2 = (bkt->first != prev_first.first) ? j: prev_first.second;
               *(--itr) = bkt->second;
               isa[*itr] = j2;
               prev_first = make_pair(bkt->first, j2);
@@ -219,58 +204,71 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
             for(int k=0; k<bucket.size(); k++) {itr++;j++;}
             j++;
           }
-          bucket.clear();//bucketを空にする    
+          bucket.clear(); 
           prev_isa = isa[*itr];
           isa[*itr] = j;
-          bucket.insert(make_pair(nodes[*itr].second & 7, *itr)); 
+          bucket.insert(make_pair(get<2>(nodes_tuple[*itr]) & 7, *itr)); 
         }
       }
       // 最後に、残ったバケツを処理する。
       auto itr = sa.rbegin(); 
           if(bucket.size()>1){
-            //j = j - bucket.size();
             std::pair<int,int> prev_first = make_pair(0,0);
 				    for(auto bkt = bucket.rbegin(); bkt != bucket.rend(); bkt++,j--){
               cerr <<j<<" "<< bkt->first <<" "<< bkt->second << isa[*(itr)] <<endl;
-              auto j2 = (bkt->first != prev_first.first) ? j: prev_first.second;//{isa[*--itr] = j;}else{auto stab = isa[*itr]; isa[*--itr] = stab;} //要検討
+              auto j2 = (bkt->first != prev_first.first) ? j : prev_first.second;
               *(itr) = bkt->second;
-              isa[*itr++] = j2; //要検討
+              isa[*itr++] = j2;
               prev_first = make_pair(bkt->first, j2);
             }
           }
 
       j = 1;
       for(auto itr = ++sa.begin();itr!=sa.end();j++,++itr){
-        cerr << j << "\t" << *itr << "\t" << (nodes[*itr].second & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
-      }
-    }
-    //break;
-  }
-    //if(node.children[value]){
-      
-    //}else{
-      
-    //}
-  //  prefix.insert(make_pair(i->first & 7, make_pair(i->first, i->first)));
-  /*
-  //Each of 
-  while(!queue.empty()){
-    int integer = queue.top();
-    queue.pop();
-    auto itr = prefix.equal_range(integer);//lower_bound(integer);
-    for(auto i = itr.first; i != itr.second; ++i){
-      if(auto next = edges.find(i->second.second) != edges.end()) {
-        //i->first = i->first * 10 + next * 5
+        cerr << j << "\t" << *itr << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
       }
     }
   }
-*/
   return edges;
 }
 
-int main(){
-  std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edge;// = new multimap<>;
-  //std::unordered_map<unsigned long long int, std::tuple<int, int, string>> rank_suffix;
+std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> add_edge(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
+  std::vector<std::unordered_map<ulli,int>::iterator> rmlist;
+  for(auto i = edges.begin(); i != edges.end(); ++i){
+    for( auto j = i->second.begin(); j != i->second.end(); ++j){ 
+      for(int k = (i->first >> 10); k<10; k++){
+        cout << "aa" << (k << 10) + j->first << endl;
+        if(edges.find((k << 10)+j->first) == edges.end()) break;
+        i->second.insert(make_pair((k << 10)+j->first,j->second ));
+      }
+    }
+  }
+
+  for(auto i = edges.begin(); i != edges.end(); ++i){
+    for( auto j = i->second.begin(); j != i->second.end(); ++j){ 
+      for(int k = (i->first >> 10)+1; k<10; k++){
+        auto s = edges.find((k << 10) + i->first - ((i->first >> 10 ) << 10));
+        cout << i->first << (k<<10)-((i -> first >> 10 ) << 10)+i->first << endl;
+        if(s == edges.end())break;
+        for(auto l = s->second.begin(); l != s->second.end(); ++l){
+          cout << "a" << i->first << " " << (k << 10) + i->first << " " << j->first << " " << l->first << endl;
+          if(l->first == j->first){cout << j->first << endl; rmlist.push_back(j);}
+        }
+      }
+    }
+    for(int w = 0; w<rmlist.size(); w++){
+      if(w == 0 || rmlist[w] != rmlist[w-1]){
+        cout << i->first << rmlist[w]->first << endl;
+        i->second.erase(rmlist[w]);
+      }
+    }
+    rmlist.clear();
+  }
+  return edges;
+}
+
+int main(int argc, char** argv){
+  std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edge;
   string alignment;
   int a;
   cin >> a;
@@ -279,6 +277,8 @@ int main(){
     edge = edge_set(alignment, edge);
   }
   edge = prefix_sorted_automaton(edge);
+  edge = add_edge(edge);
   cytoscape(edge);
+  //bwt(edge, ranks);
   return 0; 
 }
