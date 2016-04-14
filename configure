@@ -4421,7 +4421,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 # Checks for libraries.
 AX_CXX_COMPILE_STDCXX_11
-CXXFLAGS='-Wall -std=c++11'
+CXXFLAGS='-Wall -std=c++11 -O2'
 
 # Checks for header files.
 

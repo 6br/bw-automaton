@@ -13,7 +13,7 @@ AC_PROG_CPP
 
 # Checks for libraries.
 AX_CXX_COMPILE_STDCXX_11
-CXXFLAGS='-Wall -std=c++11'
+CXXFLAGS='-Wall -std=c++11 -O2'
 
 # Checks for header files.
 AC_CHECK_HEADERS([string.h])
