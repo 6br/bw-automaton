@@ -289,8 +289,12 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
 }
 
 int main(int argc, char** argv){
+  bool dot_use = false;
   if(argc >= 2 && strcmp(argv[1], "-v") == 0){
     verbose = true;
+  }
+  if(argc >= 2 && strcmp(argv[1], "-d") == 0){
+    dot_use = true;
   }
   std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edge;
   string alignment;
@@ -302,8 +306,11 @@ int main(int argc, char** argv){
   }
   edge = prefix_sorted_automaton(edge);
   edge = add_edge(edge);
-  cytoscape(edge);
-  dot(edge);
+  if(dot_use){
+    dot(edge);
+  }else{
+    cytoscape(edge);
+  }
   //bwt(edge, ranks);
   return 0; 
 }
