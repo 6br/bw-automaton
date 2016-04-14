@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <list>
 #include <algorithm>
+#include "main.h"
 using namespace std;
 
 typedef unsigned long long int ulli;
@@ -76,6 +77,20 @@ void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<uns
     }
   }
   cout << "]}," << endl;
+  return;
+}
+
+void dot(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
+  cout << "digraph G {" << endl;
+  for(auto i = edges.begin(); i != edges.end(); ++i){
+    cout << i->first << "[label=\"" << int2base((i->first & 7))  <<"\"];" << endl;
+  }
+  for(auto i = edges.begin(); i != edges.end(); ++i){
+    for(auto it = i->second.begin(); it != i->second.end(); ++it){
+      cout << i->first << "->" << it->first  << " [weight = "<< it->second <<"];" << endl;
+    }
+  }
+  cout << "}" << endl;
   return;
 }
 
@@ -288,6 +303,7 @@ int main(int argc, char** argv){
   edge = prefix_sorted_automaton(edge);
   edge = add_edge(edge);
   cytoscape(edge);
+  dot(edge);
   //bwt(edge, ranks);
   return 0; 
 }
