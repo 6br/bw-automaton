@@ -1,1 +1,1 @@
-g++ -std=c++11 main.cpp && ./a.out < main.txt
+g++ -std=c++11 -O2 main.cpp && ./a.out < main.txt
