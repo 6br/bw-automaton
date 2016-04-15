@@ -82,6 +82,7 @@ void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<uns
 
 void dot(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
   cout << "digraph G {" << endl;
+  cout << "graph [rankdir = LR]" << endl;
   for(auto i = edges.begin(); i != edges.end(); ++i){
     cout << i->first << "[label=\"" << int2base((i->first & 7))  <<"\"];" << endl;
   }
@@ -288,29 +289,39 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
   return edges;
 }
 
+void output(bool dot_use, unordered_map<ulli, unordered_map<ulli, int>> edges){
+  if(dot_use){
+    dot(edges);
+  } else {
+    cytoscape(edges);
+  }
+  return;
+}
+
 int main(int argc, char** argv){
   bool dot_use = false;
-  if(argc >= 2 && strcmp(argv[1], "-v") == 0){
+  bool midstream = false;
+  if(argc >= 2 && strstr(argv[1], "v") != NULL){
     verbose = true;
   }
-  if(argc >= 2 && strcmp(argv[1], "-d") == 0){
+  if(argc >= 2 && strstr(argv[1], "d") != NULL){
     dot_use = true;
   }
-  std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edge;
+  if(argc >= 2 && strstr(argv[1], "m") != NULL){
+    midstream = true;
+  }
+  std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges;
   string alignment;
   int a;
   cin >> a;
   for (int i=0;i<a;i++){
     cin >> alignment;
-    edge = edge_set(alignment, edge);
+    edges = edge_set(alignment, edges);
   }
-  edge = prefix_sorted_automaton(edge);
-  edge = add_edge(edge);
-  if(dot_use){
-    dot(edge);
-  }else{
-    cytoscape(edge);
-  }
+  if(midstream)output(dot_use, edges);
+  edges = prefix_sorted_automaton(edges);
+  edges = add_edge(edges);
+  if(!midstream)output(dot_use, edges);
   //bwt(edge, ranks);
-  return 0; 
+  return EXIT_SUCCESS; 
 }
