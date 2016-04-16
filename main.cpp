@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <list>
 #include <algorithm>
+#include <bitset>
+#include <sstream>
 #include "main.h"
 using namespace std;
 
@@ -36,13 +38,13 @@ char base2int(char base){
       break;
     case 'A' : base2int = 1;
       break;
-    case 'T' : base2int = 2;
+    case 'C' : base2int = 2;
       break;
     case 'G' : base2int = 3;
       break;
-    case 'C' : base2int = 4;
+    case 'T' : base2int = 4;
       break;
-    case '#' : base2int = 5;
+    case '$' : base2int = 5;
       break;
   }
   return base2int;
@@ -55,14 +57,23 @@ char int2base(char base){
       break;
     case 1 : base2int = 'A';
       break;
-    case 2 : base2int = 'T';
+    case 2 : base2int = 'C';
       break;
     case 3 : base2int = 'G';
       break;
-    case 4 : base2int = 'C';
+    case 4 : base2int = 'T';
       break;
   }
   return base2int;
+}
+
+string bits2base(int base){
+  stringstream ss;
+  if(base & (1<<0)) ss << "A";
+  if(base & (1<<1)) ss << "C";
+  if(base & (1<<2)) ss << "G";
+  if(base & (1<<3)) ss << "T";
+  return ss.str();
 }
 
 void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
@@ -97,49 +108,51 @@ void dot(std::unordered_map<unsigned long long int, std::unordered_map<unsigned 
 
 std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edge_set(string alignment, std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
   unsigned long long prev = 0;
-  alignment += "#";
+  alignment += "$";
   for(std::string::size_type i = 0; i <= alignment.size(); ++i) {
     char base = base2int(alignment[i]);
     if(base != 0){
-    unsigned long long int next = (i << 3) + (int)base;
-    auto got = edges.find(prev);
+      unsigned long long int next = (i << 3) + (int)base;
+      auto got = edges.find(prev);
       if(got == edges.end() ) {
         std::unordered_map<unsigned long long int, int> internal_edge;
         edges.insert(make_pair(prev, internal_edge));
         got = edges.find(prev);
       }
-    auto got2 = got->second.find(next);
+      auto got2 = got->second.find(next);
       if(got2 == got->second.end() ){
         got->second.insert(make_pair(next, 1));
       }else{
         got2->second++;
       }
     prev = next;
-   }
+    }
   }
   return edges;
 }
 
-std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> prefix_sorted_automaton(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
+//std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> prefix_sorted_automaton(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
+std::pair<std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>>, std::unordered_map<unsigned long long int, int>> prefix_sorted_automaton(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
   std::vector<int> isa;
   std::vector<int> sa_builder(100);
   std::list<int> sa;
-  std::vector<int> radix(5, 0);
-  std::vector<int> radix_pointer(5, 0);
+  std::vector<int> radix(6, 0);
+  std::vector<int> radix_pointer(6, 0);
   std::vector<std::tuple<ulli, ulli, ulli>> nodes_tuple(100);
 
   // Initialize
   for(auto i = edges.begin(); i != edges.end(); ++i){
     int value = i->first & 7;
     //count value
-    radix[value]+=1;
+    radix[value] += 1;
   }
-  for(auto i = 1; i<5; i++){
+  for(auto i = 0; i<6; i++){
     radix[i] += radix[i-1];
     radix_pointer[i] = radix[i];
     //cout << radix[i] << endl;
   }
-  int j=0;
+  radix_pointer[0] = 1;
+  int j = 0;
   for(auto i = edges.begin(); i != edges.end(); ++i, ++j){
     int value = i->first & 7;
     //count value
@@ -153,7 +166,7 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
   if(verbose){
     j = 0;
     for(auto itr = sa.begin(); j < edges.size(); j++, ++itr){
-      cerr << j << "\t" << *itr << "\t" << (get<0>(nodes_tuple[*itr]) & 7) << "\t" << isa[*itr] << "\t" << isa[j] << endl;
+      cerr << j << "\t" << *itr << "\t" << (get<0>(nodes_tuple[*itr])) << "\t" << isa[*itr] << "\t" << isa[j] << endl;
     }
   }
   int node_size = edges.size();
@@ -170,8 +183,10 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
         int it = 0;
         for(auto s = succeeder.begin(); s != succeeder.end(); ++s, ++it){
             if(verbose) cerr << j<<" "<<it<<" " << s->first << endl;
-          if (it == 0){
+          if(it == 0){
+            cout << get<0>(nodes_tuple[*itr]) << "a" << endl;
             get<2>(nodes_tuple[*itr]) = s->first; 
+            cout << get<2>(nodes_tuple[*itr]) << (get<2>(nodes_tuple[*itr]) & 7) << "a" << endl;
           }else{
             std::unordered_map<unsigned long long int, int> internal_edge;
             auto it = edges[get<0>(nodes_tuple[*itr])].begin();
@@ -185,12 +200,12 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
             }
             int i;
             for(i = 1; i < 10; i++){
-              if(verbose) cerr << "aa" << (i << 10) + get<0>(nodes_tuple[*itr])  << endl;
-              if(edges.find((i << 10)+get<0>(nodes_tuple[*itr])) == edges.end())break;
+              if(verbose) cerr << "aa" << (i << 10) + get<0>(nodes_tuple[*itr]) << endl;
+              if(edges.find((i << 10) + get<0>(nodes_tuple[*itr])) == edges.end())break;
             }
             edges.insert(make_pair((i << 10) + get<0>(nodes_tuple[*itr]), internal_edge));
             
-            nodes_tuple[node_size] = make_tuple(get<0>(nodes_tuple[*itr]), from, s->first);
+            nodes_tuple[node_size] = make_tuple((i << 10) + get<0>(nodes_tuple[*itr]), from, s->first);
             isa[node_size] = isa[*itr];
             itr = sa.insert(itr, node_size);
             node_size++; itr++;
@@ -200,9 +215,9 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
     }
     if(end == false){
       if(verbose){
-        j = 1;
-        for(auto itr = ++sa.begin();itr!=sa.end();j++,++itr){
-          cerr << j << "\t" << *itr << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
+        j = 0;
+        for(auto itr = sa.begin();itr!=sa.end();j++,++itr){
+          cerr << j << "\t" << *itr << "\t" << (get<0>(nodes_tuple[*itr]))<<"\t" <<(get<2>(nodes_tuple[*itr]) & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
         }
       }
       j = 1;
@@ -211,7 +226,7 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
       for(auto itr = ++sa.begin(); itr!=sa.end(); j++, ++itr){
         if(verbose) cerr << isa[*itr] << prev_isa << endl;
         if((isa[*itr]) == prev_isa){
-           bucket.insert(make_pair(get<2>(nodes_tuple[*itr]) & 7, *itr)); 
+           bucket.insert(make_pair((get<2>(nodes_tuple[*itr]) & 7) % 5, *itr)); 
         }else{ 
           if(bucket.size()>1){
             std::pair<int,int> prev_first = make_pair(0,0);
@@ -236,6 +251,7 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
       auto itr = sa.rbegin(); 
           if(bucket.size()>1){
             std::pair<int,int> prev_first = make_pair(0,0);
+            j--;
 				    for(auto bkt = bucket.rbegin(); bkt != bucket.rend(); bkt++,j--){
               if(verbose) cerr <<j<<" "<< bkt->first <<" " << bkt->second << " "  << isa[*(itr)] << " " << endl;
               auto j2 = (bkt->first != prev_first.first) ? j : prev_first.second;
@@ -252,7 +268,16 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
       }
     }
   }
-  return edges;
+  j = 0;
+  std::unordered_map<ulli, int> ranks;
+  for(auto itr = sa.begin();itr!=sa.end();j++,++itr){
+    //cerr << j << "\t" << *itr << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
+    cerr << *itr << "\t" << (get<0>(nodes_tuple[*itr]) ) << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << endl;
+   // rank.push_back(get<0>(nodes_tuple[*itr]));
+    ranks.insert(make_pair(get<0>(nodes_tuple[*itr]), j));
+  }
+  //return edges;
+  return std::make_pair(edges, ranks);
 }
 
 std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> add_edge(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
@@ -275,7 +300,7 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
       for(int k = (i->first >> 10)+1; k<10; k++){
         auto s = edges.find((k << 10) + i->first - ((i->first >> 10 ) << 10));
         if(verbose) cerr << i->first << (k<<10)-((i -> first >> 10 ) << 10)+i->first << endl;
-        if(s == edges.end())break;
+        if(s == edges.end()) break;
         for(auto l = s->second.begin(); l != s->second.end(); ++l){
           if(verbose) cerr << "a" << i->first << " " << (k << 10) + i->first << " " << j->first << " " << l->first << endl;
           if(l->first == j->first){if(verbose) cerr << j->first << endl; rmlist.push_back(j);}
@@ -301,6 +326,27 @@ void output(bool dot_use, unordered_map<ulli, unordered_map<ulli, int>> edges){
   return;
 }
 
+void bwt(std::unordered_map<ulli, unordered_map<ulli, int>> edges, std::unordered_map<ulli, int> ranks){
+  std::vector<int> m(ranks.size());
+  std::vector<int> bwt(ranks.size(), 0);
+  for(auto k = ranks.begin(); k != ranks.end(); ++k){
+    cout << k->first << "\t" << k->second << "a" << endl;
+  }
+  for(auto i = edges.begin(); i != edges.end(); ++i){
+    m[ranks[i->first]] = (1 << i->second.size() - 1); 
+    for(auto it = i->second.begin(); it != i->second.end(); ++it){
+      bwt[ranks[it->first]] = bwt[ranks[it -> first]] | (1 << ((i->first & 7) - 1));
+      cout << it->first << "\t" << ranks[it->first] << "\t" << i->first << "\t" << (i->first & 7) << endl;
+      //cout << "{ data: { source: '" << i->first << "', target: '" << it->first  << "', strength: "<< pow(10, (it->second)) <<" } }," << endl;
+    }
+  }
+  for(int j = 0; j < ranks.size(); j++){
+    cout << j << "\t" << bits2base(bwt[j]) << "\t" << static_cast<std::bitset<8>>(bwt[j]) << "\t" << static_cast<std::bitset<8>>(m[j]) << endl;
+    
+  }
+  return;
+}
+
 int main(int argc, char** argv){
   bool dot_use = false;
   bool midstream = false;
@@ -322,10 +368,12 @@ int main(int argc, char** argv){
     edges = edge_set(alignment, edges);
   }
   if(midstream)output(dot_use, edges);
-  edges = prefix_sorted_automaton(edges);
+  auto edges_pair = prefix_sorted_automaton(edges);
+  //edges = prefix_sorted_automaton(edges);
+  edges = edges_pair.first;
   edges = add_edge(edges);
   edges = remove_edge(edges);
   if(!midstream)output(dot_use, edges);
-  //bwt(edge, ranks);
+  bwt(edges, edges_pair.second);
   return EXIT_SUCCESS; 
 }
