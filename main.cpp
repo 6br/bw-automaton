@@ -7,9 +7,8 @@
 #include <unordered_map>
 #include <list>
 #include <algorithm>
-#include <bitset>
-#include <sstream>
 #include "main.h"
+#include "bwt.h"
 using namespace std;
 
 typedef unsigned long long int ulli;
@@ -64,15 +63,6 @@ char int2base(char base){
       break;
   }
   return base2int;
-}
-
-string bits2base(int base){
-  stringstream ss;
-  if(base & (1<<0)) ss << "A";
-  if(base & (1<<1)) ss << "C";
-  if(base & (1<<2)) ss << "G";
-  if(base & (1<<3)) ss << "T";
-  return ss.str();
 }
 
 void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
@@ -320,27 +310,6 @@ void output(bool dot_use, unordered_map<ulli, unordered_map<ulli, int>> edges){
   return;
 }
 
-void bwt(std::unordered_map<ulli, unordered_map<ulli, int>> edges, std::unordered_map<ulli, int> ranks){
-  std::vector<int> m(ranks.size());
-  std::vector<int> bwt(ranks.size(), 0);
-  if(verbose){
-    for(auto k = ranks.begin(); k != ranks.end(); ++k){
-      cerr << k->first << "\t" << k->second << "a" << endl;
-    }
-  }
-  for(auto i = edges.begin(); i != edges.end(); ++i){
-    m[ranks[i->first]] = (1 << i->second.size() - 1); 
-    for(auto it = i->second.begin(); it != i->second.end(); ++it){
-      bwt[ranks[it->first]] = bwt[ranks[it -> first]] | (1 << ((i->first & 7) - 1));
-      if(verbose)cerr << it->first << "\t" << ranks[it->first] << "\t" << i->first << "\t" << (i->first & 7) << endl;
-    }
-  }
-  for(int j = 0; j < ranks.size(); j++){
-    cout << j << "\t" << bits2base(bwt[j]) << "\t" << static_cast<std::bitset<8>>(m[j]) << endl;
-  }
-  return;
-}
-
 int main(int argc, char** argv){
   bool dot_use = false;
   bool midstream = false;
@@ -376,6 +345,9 @@ int main(int argc, char** argv){
   edges = add_edge(edges);
   edges = remove_edge(edges);
   if(!midstream && !bwt_use)output(dot_use, edges);
-  if(bwt_use)bwt(edges, edges_pair.second);
+  if(bwt_use) {
+    BWT bwt = BWT(edges, edges_pair.second, verbose);
+    bwt.print();
+  }
   return EXIT_SUCCESS; 
 }
