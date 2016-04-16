@@ -152,7 +152,7 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
   }
   if(verbose){
     j = 0;
-    for(auto itr=sa.begin();j<edges.size();j++,++itr){
+    for(auto itr = sa.begin(); j < edges.size(); j++, ++itr){
       cerr << j << "\t" << *itr << "\t" << (get<0>(nodes_tuple[*itr]) & 7) << "\t" << isa[*itr] << "\t" << isa[j] << endl;
     }
   }
@@ -256,7 +256,6 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
 }
 
 std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> add_edge(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
-  std::vector<std::unordered_map<ulli,int>::iterator> rmlist;
   for(auto i = edges.begin(); i != edges.end(); ++i){
     for( auto j = i->second.begin(); j != i->second.end(); ++j){ 
       for(int k = (i->first >> 10); k<10; k++){
@@ -266,7 +265,11 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
       }
     }
   }
+  return edges;
+}
 
+std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> remove_edge(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
+  std::vector<std::unordered_map<ulli,int>::iterator> rmlist;
   for(auto i = edges.begin(); i != edges.end(); ++i){
     for( auto j = i->second.begin(); j != i->second.end(); ++j){ 
       for(int k = (i->first >> 10)+1; k<10; k++){
@@ -321,6 +324,7 @@ int main(int argc, char** argv){
   if(midstream)output(dot_use, edges);
   edges = prefix_sorted_automaton(edges);
   edges = add_edge(edges);
+  edges = remove_edge(edges);
   if(!midstream)output(dot_use, edges);
   //bwt(edge, ranks);
   return EXIT_SUCCESS; 

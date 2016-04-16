@@ -4,7 +4,7 @@ bwt-automaton
 Convert the multiple-alignment result to prefix-sorted-automaton for Burrows Wheeler Transformation
 
 ## Description
-To visualize or map faster, we often use graph expression of reference genome.
+To visualize or map faster, we often use graph expression of reference genome. This program converts multiple alignment result to automaton, which is small and understandable expression.
 
 ## Dependency
 * GCC
@@ -49,7 +49,7 @@ main -dm < sample.txt | dot -Tpng -o sample.png
 ```
 
 ## Notion
-* BWT hasn't implemented yet.
+* BWT(xbw) hasn't implemented yet. But you can create bwt table from reverse prefix-sorted automaton easily.
 
 ## License
 MIT

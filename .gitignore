@@ -27,5 +27,5 @@
 *.out
 *.app
 
-compile.sh
+test.sh
 *.cache/
