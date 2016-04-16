@@ -7,6 +7,8 @@
 #include <string>
 
 using namespace std;
+typedef unsigned long long int ulli;
+
 #ifndef MAIN_HPP
 #define MAIN_HPP
 char base2int(char base);
@@ -19,6 +21,7 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
 std::pair<std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>>, std::unordered_map<unsigned long long int, int>> prefix_sorted_automaton(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges);
 std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> remove_edge(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges);
 std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> add_edge(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges);
+void bwt(std::unordered_map<ulli, unordered_map<ulli, int>> edges, std::unordered_map<ulli, int> ranks);
 void output(bool dot_use, std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges);
 int main(int argc, char** argv);
 

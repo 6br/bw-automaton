@@ -14,7 +14,6 @@ using namespace std;
 
 typedef unsigned long long int ulli;
 #define debug(x) cout<<#x<<": "<<x<<endl
-#define DEBUG(x) cout<<#x<<": "<<x<<endl;
 bool verbose = false;
 
 /*
@@ -149,7 +148,6 @@ std::pair<std::unordered_map<unsigned long long int, std::unordered_map<unsigned
   for(auto i = 0; i<6; i++){
     radix[i] += radix[i-1];
     radix_pointer[i] = radix[i];
-    //cout << radix[i] << endl;
   }
   radix_pointer[0] = 1;
   int j = 0;
@@ -184,9 +182,7 @@ std::pair<std::unordered_map<unsigned long long int, std::unordered_map<unsigned
         for(auto s = succeeder.begin(); s != succeeder.end(); ++s, ++it){
             if(verbose) cerr << j<<" "<<it<<" " << s->first << endl;
           if(it == 0){
-            cout << get<0>(nodes_tuple[*itr]) << "a" << endl;
             get<2>(nodes_tuple[*itr]) = s->first; 
-            cout << get<2>(nodes_tuple[*itr]) << (get<2>(nodes_tuple[*itr]) & 7) << "a" << endl;
           }else{
             std::unordered_map<unsigned long long int, int> internal_edge;
             auto it = edges[get<0>(nodes_tuple[*itr])].begin();
@@ -222,7 +218,7 @@ std::pair<std::unordered_map<unsigned long long int, std::unordered_map<unsigned
       }
       j = 1;
       auto prev_isa = isa[*sa.begin()];
-      std::multimap<int, int> bucket; //O(log n)になってしまうので、基数ソートしたいが連結リスト表現だとが大きいか。
+      std::multimap<int, int> bucket; //It'll may be O(log n)
       for(auto itr = ++sa.begin(); itr!=sa.end(); j++, ++itr){
         if(verbose) cerr << isa[*itr] << prev_isa << endl;
         if((isa[*itr]) == prev_isa){
@@ -271,9 +267,7 @@ std::pair<std::unordered_map<unsigned long long int, std::unordered_map<unsigned
   j = 0;
   std::unordered_map<ulli, int> ranks;
   for(auto itr = sa.begin();itr!=sa.end();j++,++itr){
-    //cerr << j << "\t" << *itr << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << "\t"<<isa[*itr] << "\t" << isa[j] << endl;
-    cerr << *itr << "\t" << (get<0>(nodes_tuple[*itr]) ) << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << endl;
-   // rank.push_back(get<0>(nodes_tuple[*itr]));
+    if(verbose)cerr << *itr << "\t" << (get<0>(nodes_tuple[*itr]) ) << "\t" << (get<2>(nodes_tuple[*itr]) & 7) << endl;
     ranks.insert(make_pair(get<0>(nodes_tuple[*itr]), j));
   }
   //return edges;
@@ -329,20 +323,20 @@ void output(bool dot_use, unordered_map<ulli, unordered_map<ulli, int>> edges){
 void bwt(std::unordered_map<ulli, unordered_map<ulli, int>> edges, std::unordered_map<ulli, int> ranks){
   std::vector<int> m(ranks.size());
   std::vector<int> bwt(ranks.size(), 0);
-  for(auto k = ranks.begin(); k != ranks.end(); ++k){
-    cout << k->first << "\t" << k->second << "a" << endl;
+  if(verbose){
+    for(auto k = ranks.begin(); k != ranks.end(); ++k){
+      cerr << k->first << "\t" << k->second << "a" << endl;
+    }
   }
   for(auto i = edges.begin(); i != edges.end(); ++i){
     m[ranks[i->first]] = (1 << i->second.size() - 1); 
     for(auto it = i->second.begin(); it != i->second.end(); ++it){
       bwt[ranks[it->first]] = bwt[ranks[it -> first]] | (1 << ((i->first & 7) - 1));
-      cout << it->first << "\t" << ranks[it->first] << "\t" << i->first << "\t" << (i->first & 7) << endl;
-      //cout << "{ data: { source: '" << i->first << "', target: '" << it->first  << "', strength: "<< pow(10, (it->second)) <<" } }," << endl;
+      if(verbose)cerr << it->first << "\t" << ranks[it->first] << "\t" << i->first << "\t" << (i->first & 7) << endl;
     }
   }
   for(int j = 0; j < ranks.size(); j++){
-    cout << j << "\t" << bits2base(bwt[j]) << "\t" << static_cast<std::bitset<8>>(bwt[j]) << "\t" << static_cast<std::bitset<8>>(m[j]) << endl;
-    
+    cout << j << "\t" << bits2base(bwt[j]) << "\t" << static_cast<std::bitset<8>>(m[j]) << endl;
   }
   return;
 }
@@ -350,20 +344,28 @@ void bwt(std::unordered_map<ulli, unordered_map<ulli, int>> edges, std::unordere
 int main(int argc, char** argv){
   bool dot_use = false;
   bool midstream = false;
-  if(argc >= 2 && strstr(argv[1], "v") != NULL){
-    verbose = true;
+  bool bwt_use = false;
+  int bitsize = 8;
+  if(argc >= 2){
+    if(strstr(argv[1], "v") != NULL){
+      verbose = true;
+    }
+    if(strstr(argv[1], "d") != NULL){
+      dot_use = true;
+    }
+    if(strstr(argv[1], "m") != NULL){
+      midstream = true;
+    }
+    if(strstr(argv[1], "b") != NULL){
+      bwt_use = true;
+    }
   }
-  if(argc >= 2 && strstr(argv[1], "d") != NULL){
-    dot_use = true;
-  }
-  if(argc >= 2 && strstr(argv[1], "m") != NULL){
-    midstream = true;
-  }
+  if(argc >= 3)bitsize = atoi(argv[2]);
   std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges;
   string alignment;
   int a;
   cin >> a;
-  for (int i=0;i<a;i++){
+  for (int i = 0; i < a; i++){
     cin >> alignment;
     edges = edge_set(alignment, edges);
   }
@@ -373,7 +375,7 @@ int main(int argc, char** argv){
   edges = edges_pair.first;
   edges = add_edge(edges);
   edges = remove_edge(edges);
-  if(!midstream)output(dot_use, edges);
-  bwt(edges, edges_pair.second);
+  if(!midstream && !bwt_use)output(dot_use, edges);
+  if(bwt_use)bwt(edges, edges_pair.second);
   return EXIT_SUCCESS; 
 }
