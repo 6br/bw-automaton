@@ -1,4 +1,4 @@
-bwt-automaton
+bw-automaton -- bwt for multiple alignment
 ===
 
 Convert the multiple-alignment result to prefix-sorted-automaton for Burrows Wheeler Transformation
@@ -13,8 +13,8 @@ To visualize or map faster, we often use graph expression of reference genome. T
 
 ## Install
 ```bash
-git clone https://github.com/6br/bwt_automaton.git
-cd 
+git clone https://github.com/6br/bw-automaton.git
+cd bw-automaton
 ./configure
 make
 ```
@@ -41,6 +41,7 @@ And results are exported as Cytoscape.js style, So you can visualize on Web. Ple
 * v: verbose(for debugging)
 * d: export as a dot style
 * m: export reverse-deterministic-automaton
+* b: export BWT table
 
 You should use these options as below.
 
@@ -49,7 +50,7 @@ main -dm < sample.txt | dot -Tpng -o sample.png
 ```
 
 ## Notion
-* BWT(xbw) hasn't implemented yet. But you can create bwt table from reverse prefix-sorted automaton easily.
+* find(BWT) hasn't implemented yet. But you can easily find or locate from BWT table.
 
 ## License
 MIT
