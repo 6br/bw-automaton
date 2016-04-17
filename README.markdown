@@ -6,6 +6,8 @@ Convert the multiple-alignment result to prefix-sorted-automaton for Burrows Whe
 ## Description
 To visualize or map faster, we often use graph expression of reference genome. This program converts multiple alignment result to automaton, which is small and understandable expression.
 
+![Picture](https://raw.githubusercontent.com/6br/bw-automaton/master/sample/result.png)
+
 ## Dependency
 * GCC
 * C++11
