@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Bw-automaton by 6br</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Bw-automaton</h1>
+          <h2>Convert the multiple-alignment result to BWT table</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/6br/bw-automaton/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/6br/bw-automaton/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/6br/bw-automaton" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="bw-automaton----bwt-for-multiple-alignment" class="anchor" href="#bw-automaton----bwt-for-multiple-alignment" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>bw-automaton -- bwt for multiple alignment</h1>
+
+<p>Convert the multiple-alignment result to prefix-sorted-automaton for Burrows Wheeler Transformation</p>
+
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Description</h2>
+
+<p>To visualize or map faster, we often use graph expression of reference genome. This program converts multiple alignment result to automaton, which is small and understandable expression.</p>
+
+<p><img src="https://raw.githubusercontent.com/6br/bw-automaton/master/sample/test.png" alt="Picture"></p>
+
+<p><img src="https://raw.githubusercontent.com/6br/bw-automaton/master/sample/result.png" alt="Picture"></p>
+
+<h2>
+<a id="dependency" class="anchor" href="#dependency" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependency</h2>
+
+<ul>
+<li>GCC</li>
+<li>C++11</li>
+<li>Graphviz(Optional)</li>
+</ul>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h2>
+
+<div class="highlight highlight-source-shell"><pre>git clone https://github.com/6br/bw-automaton.git
+<span class="pl-c1">cd</span> bw-automaton
+./configure
+make</pre></div>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre><code>$ bw_automaton -i &lt; sample.txt
+</code></pre>
+
+<p>Sample of input is following.</p>
+
+<pre><code>4
+GACGTA-CTG
+GACGTA---G
+GATGTA-CTG
+GAC-TACCTG
+</code></pre>
+
+<p>And results are exported as Cytoscape.js style, So you can visualize on Web. Please see sample folder.</p>
+
+<h3>
+<a id="flags" class="anchor" href="#flags" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Flags</h3>
+
+<ul>
+<li>v: verbose(for debugging)</li>
+<li>d: export as a dot style</li>
+<li>m: export reverse-deterministic-automaton</li>
+<li>b: export BWT table</li>
+</ul>
+
+<p>You should use these options as below.</p>
+
+<pre><code>$ bw_automaton -dm &lt; sample.txt | dot -Tpng -o sample.png
+</code></pre>
+
+<h2>
+<a id="notion" class="anchor" href="#notion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notion</h2>
+
+<ul>
+<li>find(BWT) hasn't implemented yet. But you can easily find or locate from BWT table.</li>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>MIT</p>
+
+<h2>
+<a id="reference" class="anchor" href="#reference" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reference</h2>
+
+<ul>
+<li>Ferragina, P., Luccio, F., Manzini, G., &amp; Muthukrishnan, S. (2009). Compressing and indexing labeled trees, with applications. Journal of the ACM, 57(1), 1–33. <a href="http://doi.org/10.1145/1613676.1613680">http://doi.org/10.1145/1613676.1613680</a>
+</li>
+<li>Sirén, J., Välimäki, N., &amp; Mäkinen, V. (2014). Indexing graphs for path queries with applications in genome research. IEEE/ACM Transactions on Computational Biology and Bioinformatics, 11(2), 375–388. <a href="http://doi.org/10.1109/TCBB.2013.2297101">http://doi.org/10.1109/TCBB.2013.2297101</a>
+</li>
+</ul>
+        </section>
+
+        <footer>
+          Bw-automaton is maintained by <a href="https://github.com/6br">6br</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
