@@ -25,7 +25,7 @@ make
 
 ## Usage
 ```
-main -i < sample.txt
+$ bw_automaton -i < sample.txt
 ```
 
 Sample of input is following.
@@ -50,7 +50,7 @@ And results are exported as Cytoscape.js style, So you can visualize on Web. Ple
 You should use these options as below.
 
 ```
-main -dm < sample.txt | dot -Tpng -o sample.png
+$ bw_automaton -dm < sample.txt | dot -Tpng -o sample.png
 ```
 
 ## Notion
