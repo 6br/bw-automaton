@@ -1,6 +1,7 @@
 bw-automaton -- bwt for multiple alignment
 ===
 
+[![Build Status](https://drone.io/github.com/6br/bw-automaton/status.png)](https://drone.io/github.com/6br/bw-automaton/latest)
 Convert the multiple-alignment result to prefix-sorted-automaton for Burrows Wheeler Transformation
 
 ## Description
