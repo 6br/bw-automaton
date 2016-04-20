@@ -27,7 +27,7 @@ make
 
 ## Usage
 ```
-$ bw_automaton -i < sample.txt
+$ bw_automaton < sample/sample.txt
 ```
 
 Sample of input is following.
@@ -48,6 +48,7 @@ And results are exported as Cytoscape.js style, So you can visualize on Web. Ple
 * d: export as a dot style
 * m: export reverse-deterministic-automaton
 * b: export BWT table
+* c: export with colour(by 4 line)
 
 You should use these options as below.
 

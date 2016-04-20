@@ -3,7 +3,6 @@
 #include <string.h>
 #include <cmath>
 #include <map>
-#include <queue>
 #include <unordered_map>
 #include <list>
 #include <algorithm>
@@ -65,7 +64,8 @@ char int2base(char base){
   return base2int;
 }
 
-void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges){
+void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges, bool colour){
+  string favecolor[5] = {"#edf8fb", "#b2e2e2", "#66c2a4", "#2ca25f", "#006d2c"};
   cout << "elements: {" << endl << "nodes: [" << endl;
   for(auto i = edges.begin(); i != edges.end(); ++i){
     cout << "{ data: { id: '" <<i->first << "', name: '" << int2base((i->first & 7))  <<"'} }," << endl;
@@ -73,7 +73,9 @@ void cytoscape(std::unordered_map<unsigned long long int, std::unordered_map<uns
   cout << "], edges: [" << endl;
   for(auto i = edges.begin(); i != edges.end(); ++i){
     for(auto it = i->second.begin(); it != i->second.end(); ++it){
-      cout << "{ data: { source: '" << i->first << "', target: '" << it->first  << "', strength: "<< pow(10, (it->second)) <<" } }," << endl;
+      cout << "{ data: { source: '" << i->first << "', target: '" << it->first;
+      if(colour) cout << "', faveColor: '" << favecolor[it->second];
+      cout << "', strength: "<< pow(10, (it->second)) <<" } }," << endl;
     }
   }
   cout << "]}," << endl;
@@ -301,11 +303,11 @@ std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long
   return edges;
 }
 
-void output(bool dot_use, unordered_map<ulli, unordered_map<ulli, int>> edges){
+void output(unordered_map<ulli, unordered_map<ulli, int>> edges, bool dot_use, bool colour){
   if(dot_use){
     dot(edges);
   } else {
-    cytoscape(edges);
+    cytoscape(edges, colour);
   }
   return;
 }
@@ -314,6 +316,7 @@ int main(int argc, char** argv){
   bool dot_use = false;
   bool midstream = false;
   bool bwt_use = false;
+  bool colour = false;
   int bitsize = 8;
   if(argc >= 2){
     if(strstr(argv[1], "v") != NULL){
@@ -328,6 +331,18 @@ int main(int argc, char** argv){
     if(strstr(argv[1], "b") != NULL){
       bwt_use = true;
     }
+    if(strstr(argv[1], "c") != NULL){
+      colour = true;
+    }
+    if(strstr(argv[1], "h") != NULL){
+      cout << "bw-automaton" << endl;
+      cout << "b: export bwt table" << endl;
+      cout << "c: export as colorized cytoscape style" << endl;
+      cout << "d: export as dot style" << endl;
+      cout << "m: export midstream" << endl;
+      cout << "v: verbose" << endl;
+      return 0;
+    }
   }
   if(argc >= 3)bitsize = atoi(argv[2]);
   std::unordered_map<unsigned long long int, std::unordered_map<unsigned long long int, int>> edges;
@@ -338,13 +353,13 @@ int main(int argc, char** argv){
     cin >> alignment;
     edges = edge_set(alignment, edges);
   }
-  if(midstream)output(dot_use, edges);
+  if(midstream)output(edges, dot_use, colour);
   auto edges_pair = prefix_sorted_automaton(edges);
   //edges = prefix_sorted_automaton(edges);
   edges = edges_pair.first;
   edges = add_edge(edges);
   edges = remove_edge(edges);
-  if(!midstream && !bwt_use)output(dot_use, edges);
+  if(!midstream && !bwt_use)output(edges, dot_use, colour);
   if(bwt_use) {
     BWT bwt = BWT(edges, edges_pair.second, verbose);
     bwt.print();
