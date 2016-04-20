@@ -71,7 +71,7 @@ nodes: [
 { data: { source: '41', target: '75', faveColor: '#b2e2e2', strength: 10 } },
 { data: { source: '41', target: '58', faveColor: '#66c2a4', strength: 100 } },
 { data: { source: '68', target: '75', faveColor: '#2ca25f', strength: 1000 } },
-]}
+]},
   
   ready: function(){
     window.cy = this;
