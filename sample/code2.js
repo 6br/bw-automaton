@@ -58,7 +58,6 @@ nodes: [
 { data: { source: '20', target: '27', faveColor: '#b2e2e2', strength: 10 } },
 { data: { source: '9', target: '20', faveColor: '#b2e2e2', strength: 10 } },
 { data: { source: '9', target: '18', faveColor: '#2ca25f', strength: 1000 } },
-{ data: { source: '75', target: '85', faveColor: '#006d2c', strength: 10000 } },
 { data: { source: '3', target: '9', faveColor: '#006d2c', strength: 10000 } },
 { data: { source: '36', target: '41', faveColor: '#006d2c', strength: 10000 } },
 { data: { source: '58', target: '68', faveColor: '#2ca25f', strength: 1000 } },
